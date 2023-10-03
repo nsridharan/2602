@@ -1,0 +1,76 @@
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       VEX                                                       */
+/*    Created:      Thu Sep 26 2019                                           */
+/*    Description:  Competition Template                                      */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Controller1          controller                    
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
+#include "vex.h"
+
+using namespace vex;
+
+// A global instance of competition
+competition Competition;
+
+// define your global instances of motors and other devices here
+
+motor LeftRMotor = motor(PORT1, ratio6_1, false);
+motor LeftFMotor = motor(PORT2, ratio6_1, false);
+motor RightRMotor = motor(PORT3, ratio6_1, false);
+motor RightFMotor = motor(PORT4, ratio6_1, false);
+controller Controller1 = controller(primary);
+
+void pre_auton(void) {
+  // Initializing Robot Configuration. DO NOT REMOVE!
+  vexcodeInit();
+  // All activities that occur before the competition starts
+  // Example: clearing encoders, setting servo positions, ...
+}
+
+
+void autonomous(void) {
+  //auton goes here 
+}
+
+
+void usercontrol(void) {
+  double forward_backward = 0;
+  double turn = 0;
+  while (1) {
+    turn = Controller1.Axis2.position(); 
+    forward_backward = Controller1.Axis1.position(); 
+
+
+    double left_speed = forward_backward + turn;
+    double right_speed = forward_backward - turn;
+
+    
+    LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+    LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+    RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+    RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+    wait(20, msec); 
+  }
+}
+// Main will set up the competition functions and callbacks.
+int main() {
+  // Set up callbacks for autonomous and driver control periods.
+  Competition.autonomous(autonomous);
+  Competition.drivercontrol(usercontrol);
+
+  // Run the pre-autonomous function.
+  pre_auton();
+
+  // Prevent main from exiting with an infinite loop.
+  while (true) {
+    wait(100, msec);
+  }
+}
