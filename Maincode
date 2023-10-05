@@ -26,6 +26,7 @@ motor LeftRMotor = motor(PORT1, ratio6_1, false);
 motor LeftFMotor = motor(PORT2, ratio6_1, false);
 motor RightRMotor = motor(PORT3, ratio6_1, false);
 motor RightFMotor = motor(PORT4, ratio6_1, false);
+motor IntakeMotor = motor(PORT5, ratio6_1, false);
 controller Controller1 = controller(primary);
 
 void pre_auton(void) {
@@ -34,6 +35,7 @@ void pre_auton(void) {
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
 }
+
 
 
 void autonomous(void) {
@@ -45,8 +47,8 @@ void usercontrol(void) {
   double forward_backward = 0;
   double turn = 0;
   while (1) {
-    turn = Controller1.Axis2.position(); 
-    forward_backward = Controller1.Axis1.position(); 
+    forward_backward = Controller1.Axis2.position(); // Use right joystick for forward/backward
+    turn = Controller1.Axis1.position(); // Use left joystick for turning
 
 
     double left_speed = forward_backward + turn;
@@ -57,6 +59,14 @@ void usercontrol(void) {
     LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
     RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
     RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+
+    if(Controller1.ButtonL1.pressing()){
+      IntakeMotor.setVelocity(100,pct);
+      IntakeMotor.spin(forward);
+    }
+    else{
+      IntakeMotor.stop();
+    }
     wait(20, msec); 
   }
 }
