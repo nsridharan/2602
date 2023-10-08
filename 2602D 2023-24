@@ -21,7 +21,6 @@ using namespace vex;
 competition Competition;
 
 // define your global instances of motors and other devices here
-
 motor LeftRMotor = motor(PORT1, ratio6_1, false);
 motor LeftFMotor = motor(PORT2, ratio6_1, false);
 motor RightRMotor = motor(PORT3, ratio6_1, false);
@@ -33,40 +32,39 @@ void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
   // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
+  
 }
-
-
-
 void autonomous(void) {
-  //auton goes here 
+   
 }
-
-
 void usercontrol(void) {
-  double forward_backward = 0;
-  double turn = 0;
   while (1) {
     //Drivetrain Code
-    forward_backward = Controller1.Axis2.position(); // Use right joystick for forward/backward
-    turn = Controller1.Axis1.position(); // Use left joystick for turning
-    double left_speed = forward_backward + (turn * 2.0);
-    double right_speed = forward_backward - (turn * 2.0);
-    LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
-    LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
-    RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
-    RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+        double left_stick = Controller1.Axis3.position(); 
+        double right_stick = Controller1.Axis1.position(); 
+        double left_speed = left_stick;
+        double right_speed = left_stick;
+        left_speed += right_stick;
+        right_speed -= right_stick;
+        LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+        LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+        RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+        RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
     //Intake Code
     if(Controller1.ButtonL1.pressing()){
       IntakeMotor.setVelocity(100,pct);
       IntakeMotor.spin(forward);
     }
+    else if(Controller1.ButtonL2.pressing()){
+      IntakeMotor.setVelocity(100,pct);
+      IntakeMotor.spin(reverse);
+    }
     else{
       IntakeMotor.stop();
     }
-    wait(20, msec); 
-  }
+    wait(20, msec);
 }
+  }
 // Main will set up the competition functions and callbacks.
 int main() {
   // Set up callbacks for autonomous and driver control periods.
