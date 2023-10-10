@@ -40,12 +40,17 @@ void autonomous(void) {
 void usercontrol(void) {
   while (1) {
     //Drivetrain Code
-        double left_stick = Controller1.Axis3.position(); 
-        double right_stick = Controller1.Axis1.position(); 
-        double left_speed = left_stick;
-        double right_speed = left_stick;
-        left_speed += right_stick;
-        right_speed -= right_stick;
+        double forward_backward = Controller1.Axis1.position(); 
+        double turn = Controller1.Axis3.position(); 
+        double left_speed = forward_backward + turn;
+        double right_speed = forward_backward - turn;
+        if (forward_backward != 0 && turn != 0) {
+            if (turn > 0) {
+                right_speed *= 0.7;
+            } else {
+                left_speed *= 0.7; 
+            }
+        }
         LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
@@ -63,6 +68,7 @@ void usercontrol(void) {
       IntakeMotor.stop();
     }
     wait(20, msec);
+    //Cata Code 
 }
   }
 // Main will set up the competition functions and callbacks.
