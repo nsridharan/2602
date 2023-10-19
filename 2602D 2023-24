@@ -21,13 +21,13 @@ using namespace vex;
 competition Competition;
 
 // define your global instances of motors and other devices here
-motor LeftRMotor = motor(PORT1, ratio6_1, false);
-motor LeftFMotor = motor(PORT2, ratio6_1, false);
-motor RightRMotor = motor(PORT3, ratio6_1, false);
-motor RightFMotor = motor(PORT4, ratio6_1, false);
-motor RightUPMotor = motor(PORT5, ratio6_1, true);
-motor LeftUPMotor = motor(PORT8, ratio6_1, true);
-motor IntakeMotor = motor(PORT7, ratio6_1, false);
+motor LeftRMotor = motor(PORT1, ratio6_1, true);
+motor LeftFMotor = motor(PORT2, ratio6_1, true);
+motor RightRMotor = motor(PORT3, ratio6_1, true);
+motor RightFMotor = motor(PORT4, ratio6_1, true);
+motor RightUPMotor = motor(PORT5, ratio6_1, false);
+motor LeftUPMotor = motor(PORT8, ratio6_1, false);
+motor IntakeMotor = motor(PORT7, ratio6_1, true);
 controller Controller1 = controller(primary);
 
 void pre_auton(void) {
