@@ -25,7 +25,9 @@ motor LeftRMotor = motor(PORT1, ratio6_1, false);
 motor LeftFMotor = motor(PORT2, ratio6_1, false);
 motor RightRMotor = motor(PORT3, ratio6_1, false);
 motor RightFMotor = motor(PORT4, ratio6_1, false);
-motor IntakeMotor = motor(PORT5, ratio6_1, false);
+motor RightUPMotor = motor(PORT5, ratio6_1, false);
+motor LeftUPMotor = motor(PORT6, ratio6_1, false);
+motor IntakeMotor = motor(PORT7, ratio6_1, false);
 controller Controller1 = controller(primary);
 
 void pre_auton(void) {
@@ -53,8 +55,10 @@ void usercontrol(void) {
         }
         LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+        LeftUPMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
         RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+        RightUPMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
     //Intake Code
     if(Controller1.ButtonL1.pressing()){
       IntakeMotor.setVelocity(100,pct);
@@ -69,6 +73,7 @@ void usercontrol(void) {
     }
     wait(20, msec);
     //Cata Code 
+    
 }
   }
 // Main will set up the competition functions and callbacks.
