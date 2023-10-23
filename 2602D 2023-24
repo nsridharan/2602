@@ -31,6 +31,21 @@ motor IntakeMotor = motor(PORT7, ratio6_1, true);
 motor CataMotor = motor(PORT7, ratio6_1, true);
 controller Controller1 = controller(primary);
 
+double rotationToFeet(double rotations) {
+
+    const double feetPerRotation = 1.5; // To be adjusted 
+    return rotations * feetPerRotation;
+}
+void displayAverageVelocityOnController(controller &controller) {
+    double leftRPM = (LeftRMotor.velocity(rpm) + LeftFMotor.velocity(rpm)) / 2.0;
+    double leftFPS = rotationToFeet(leftRPM) * 1 / 60; // Convert RPM to FPS
+    double rightRPM = (RightRMotor.velocity(rpm) + RightFMotor.velocity(rpm)) / 2.0;
+    double rightFPS = rotationToFeet(rightRPM) * 1 / 60; // Convert RPM to FPS
+    double averageFPS = (leftFPS + rightFPS) / 2.0;
+    controller.Screen.clearLine();
+    controller.Screen.setCursor(1, 1);
+    controller.Screen.print("Average FPS: %.2f", averageFPS);
+}
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
@@ -60,6 +75,9 @@ void usercontrol(void) {
         RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
         RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
         RightUPMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+
+    displayAverageVelocityOnController(Controller1);
+
     //Intake Code
     if(Controller1.ButtonL1.pressing()){
       IntakeMotor.setVelocity(100,pct);
