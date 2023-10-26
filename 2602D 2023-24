@@ -21,15 +21,32 @@ using namespace vex;
 competition Competition;
 
 // define your global instances of motors and other devices here
-motor LeftRMotor = motor(PORT1, ratio6_1, false);
-motor LeftFMotor = motor(PORT2, ratio6_1, false);
-motor RightRMotor = motor(PORT3, ratio6_1, false);
-motor RightFMotor = motor(PORT4, ratio6_1, false);
-motor RightUPMotor = motor(PORT5, ratio6_1, true);
-motor LeftUPMotor = motor(PORT8, ratio6_1, true);
-motor IntakeMotor = motor(PORT7, ratio6_1, false);
+motor LeftRMotor = motor(PORT1, ratio6_1, true);
+motor LeftFMotor = motor(PORT2, ratio6_1, true);
+motor RightRMotor = motor(PORT3, ratio6_1, true);
+motor RightFMotor = motor(PORT4, ratio6_1, true);
+motor RightUPMotor = motor(PORT5, ratio6_1, false);
+motor LeftUPMotor = motor(PORT8, ratio6_1, false);
+motor IntakeMotor = motor(PORT9, ratio6_1, true);
+motor CataMotor = motor(PORT6, ratio6_1, true);
 controller Controller1 = controller(primary);
 
+double rotationToFeet(double rotations) {
+
+    const double feetPerRotation = 1.5; // To be adjusted 
+    return rotations * feetPerRotation;
+}
+void displayAverageVelocityOnController(controller &controller) {
+    double leftRPM = (LeftRMotor.velocity(rpm) + LeftFMotor.velocity(rpm)) / 2.0;
+    double leftFPS = rotationToFeet(leftRPM) * 1 / 60; 
+    double rightRPM = (RightRMotor.velocity(rpm) + RightFMotor.velocity(rpm)) / 2.0;
+    double rightFPS = rotationToFeet(rightRPM) * 1 / 60; 
+    double averageFPS = fabs((leftFPS + rightFPS) / 2.0); // fabs returns the absolute value
+
+    controller.Screen.clearLine();
+    controller.Screen.setCursor(1, 1);
+    controller.Screen.print("Average FPS: %.2f", averageFPS);
+}
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
@@ -41,6 +58,7 @@ void autonomous(void) {
 }
 void usercontrol(void) {
   while (1) {
+    displayAverageVelocityOnController(Controller1);
     //Drivetrain Code
         double forward_backward = Controller1.Axis1.position(); 
         double turn = Controller1.Axis3.position(); 
@@ -61,11 +79,11 @@ void usercontrol(void) {
         RightUPMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
     //Intake Code
     if(Controller1.ButtonL1.pressing()){
-      IntakeMotor.setVelocity(100,pct);
+      IntakeMotor.setVelocity(50,pct);
       IntakeMotor.spin(forward);
     }
     else if(Controller1.ButtonL2.pressing()){
-      IntakeMotor.setVelocity(100,pct);
+      IntakeMotor.setVelocity(50,pct);
       IntakeMotor.spin(reverse);
     }
     else{
@@ -73,6 +91,17 @@ void usercontrol(void) {
     }
     wait(20, msec);
     //Cata Code 
+    if(Controller1.ButtonR1.pressing()){
+      CataMotor.setVelocity(100,pct);
+      CataMotor.spin(reverse);
+    }
+    else if(Controller1.ButtonR2.pressing()){
+      CataMotor.setVelocity(100,pct);
+      CataMotor.spin(fwd);
+    }
+    else{
+      CataMotor.stop();
+    }
     
 }
   }
