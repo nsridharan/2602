@@ -10,18 +10,7 @@
 // ---- START VEXCODE CONFIGURED DEVICES ----
 // Robot Configuration:
 // [Name]               [Type]        [Port(s)]
-// Drivetrain           drivetrain    20, 10, 19, 9, 4
 // Controller1          controller                    
-// LauncherMotor        motor         12              
-// RollerMotor          motor         1               
-// IntakeMotor          motor         18              
-// IndexerMotor         motor         8               
-// ExpansionPiston1     digital_out   A               
-// ExpansionPiston2     digital_out   B               
-// ExpansionPiston3     digital_out   C               
-// OpticalSensor        optical       2               
-// LEDD                 led           D               
-// Vision3              vision        3               
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
@@ -31,183 +20,96 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
+// define your global instances of motors and other devices here
+motor LeftRMotor = motor(PORT1, ratio6_1, true);
+motor LeftFMotor = motor(PORT2, ratio6_1, true);
+motor RightRMotor = motor(PORT3, ratio6_1, true);
+motor RightFMotor = motor(PORT4, ratio6_1, true);
+motor RightUPMotor = motor(PORT5, ratio6_1, false);
+motor LeftUPMotor = motor(PORT8, ratio6_1, false);
+motor IntakeMotor = motor(PORT9, ratio6_1, true);
+motor CataMotor = motor(PORT6, ratio6_1, true);
+controller Controller1 = controller(primary);
 
+double rotationToFeet(double rotations) {
 
-
+    const double feetPerRotation = 1.5; // To be adjusted 
+    return rotations * feetPerRotation;
+}
+void displayAverageVelocityOnController(controller &controller) {
+    double leftRPM = (LeftRMotor.velocity(rpm) + LeftFMotor.velocity(rpm)) / 2.0;
+    double leftFPS = rotationToFeet(leftRPM) * 1 / 60; 
+    double rightRPM = (RightRMotor.velocity(rpm) + RightFMotor.velocity(rpm)) / 2.0;
+    double rightFPS = rotationToFeet(rightRPM) * 1 / 60; 
+    double averageFPS = fabs((leftFPS + rightFPS) / 2.0); 
+    controller.Screen.clearLine();
+    controller.Screen.setCursor(1, 1);
+    controller.Screen.print("Average FPS: %.2f", averageFPS);
+}
 void pre_auton(void) {
   // Initializing Robot Configuration. DO NOT REMOVE!
   vexcodeInit();
-  
-
+  // All activities that occur before the competition starts
   
 }
-
-
-
 void autonomous(void) {
-  LauncherMotor.setVelocity(67.5,percent);
-  LauncherMotor.spin(forward);
-  Drivetrain.driveFor(reverse,1,inches);
-  RollerMotor.spinFor(forward,90,degrees);
-  Drivetrain.driveFor(forward,2.5,inches);
-  Drivetrain.turnFor(left,10,degrees);
-  //LauncherMotor.setVelocity(65,percent);
-  //Drivetrain.driveFor(forward, 38, inches);
-  //Drivetrain.turnFor(left, 81.5, deg);
-  //LauncherMotor.spin(forward);
-  wait(1.5,seconds);
-  IntakeMotor.spin(forward);
-  LauncherMotor.setVelocity(69,percent);
-  wait(.3,seconds);
-  //Drivetrain.turnFor(left, 0, deg);
-  IndexerMotor.spin(forward);
-  Drivetrain.turnFor(65, deg);
-  Drivetrain.driveFor(12, inches);
-  Drivetrain.turnFor(right, 180, deg);
   
 }
-
-
 void usercontrol(void) {
   while (1) {
-    // Expirimental New code 
-    //double TURNSPEED=1;
-    //double SLOWTURNSPEED=0.25;
-    //Drivetrain.turn(right);
-    //Drivetrain.setTurnVelocity( (Controller1.Axis4.position(pct)*SLOWTURNSPEED)+(Controller1.Axis1.position(pct)*TURNSPEED), pct);
-
-    //Drivetrain.drive(forward);
-    //Drivetrain.setDriveVelocity(Controller1.Axis3.position(pct), pct);
-    // New code ^^^
-
-    Brain.Screen.print("Programmed by Nithilan S.\n");
-    OpticalSensor.setLight(ledState::on); 
-    OpticalSensor.setLightPower(100, percent); 
-    LEDD.set(true);
-    if(Controller1.ButtonR2.pressing()){
-      LauncherMotor.setVelocity(55,percent);
-      LauncherMotor.spin(forward);
+    displayAverageVelocityOnController(Controller1);
+    //Drivetrain Code
+        double forward_backward = Controller1.Axis1.position();
+double turn = Controller1.Axis3.position();
+double left_speed = (forward_backward + turn) * 0.7;
+double right_speed = (forward_backward - turn) * 0.7;
+if (forward_backward != 0 && turn != 0) {
+    if (turn > 0) {
+        right_speed *= 0.7;
+    } else {
+        left_speed *= 0.7;
     }
-    else if (Controller1.ButtonUp.pressing()){
-      LauncherMotor.setVelocity(80,percent);
-      LauncherMotor.spin(forward);
-    }
-    else{
-      LauncherMotor.stop();
-    }
-    if(Controller1.ButtonL1.pressing()){
-      IndexerMotor.setVelocity(125,pct);
-      IndexerMotor.spin(forward);
-    }
-    else if(Controller1.ButtonRight.pressing()){
-      IndexerMotor.spin(reverse);
-
-    }
-    else{
-      IndexerMotor.stop();
-    }
+}
+        LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+        LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+        LeftUPMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
+        RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+        RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+        RightUPMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
+    //Intake Code
     if(Controller1.ButtonL2.pressing()){
+      IntakeMotor.setVelocity(75,pct);
       IntakeMotor.spin(forward);
     }
-    else if(Controller1.ButtonLeft.pressing()){
+    else if(Controller1.ButtonL1.pressing()){
+      IntakeMotor.setVelocity(75,pct);
       IntakeMotor.spin(reverse);
     }
     else{
       IntakeMotor.stop();
     }
+    wait(20, msec);
+    //Cata Code 
     if(Controller1.ButtonR1.pressing()){
-      RollerMotor.spin(forward);
+      CataMotor.setVelocity(100,pct);
+      CataMotor.spin(reverse);
+    }
+    else if(Controller1.ButtonR2.pressing()){
+      CataMotor.setVelocity(100,pct);
+      CataMotor.spin(fwd);
     }
     else{
-    RollerMotor.stop();
-    }
-    if( Controller1.ButtonX.pressing() ) {
-     ExpansionPiston3.set(true);
-     ExpansionPiston1.set(true);
-     ExpansionPiston2.set(true);
-     //ExpansionPiston3.set(true);
-     Brain.Screen.clearScreen();
-     //Brain.Screen.print("yessir");
-     Controller1.rumble(rumbleShort);
-    }
-    else if (Controller1.ButtonB.pressing()){
-     ExpansionPiston3.set(false);
-     ExpansionPiston1.set(false);
-     ExpansionPiston2.set(false);
-     Controller1.rumble(rumbleShort);
-     //ExpansionPiston3.set(false);
-     //Brain.Screen.clearScreen();
-    }
-    if(Controller1.ButtonR1.pressing()){
-      //do
-    //{
-      RollerMotor.spin(forward);
-    //} while (OpticalSensor.color() == red);
-    }
-    else {
-      RollerMotor.stop();
-    }
-    wait(20, msec); 
-  }
-}
-int Vision3_objectIndex = 0;
-float myVariable;
-bool controller1ButtonRight_pressed_0 = false;
-
-// "when Controller1 ButtonRight released" 
-void onevent_Controller1ButtonRight_released_0() {
-  Drivetrain.stop();
-  controller1ButtonRight_pressed_0 = false;
-}
-
-// "when Controller1 ButtonDown pressed" hat block
-void onevent_Controller1ButtonRight_pressed_0() {
-  controller1ButtonRight_pressed_0 = true;
-  
-  //while (true) {
-  while (controller1ButtonRight_pressed_0) {
-    repeat(1){
-      Vision3.takeSnapshot(Vision3__RED_GOAL);
-    if (Vision3.objectCount > 0) {
-      if (Vision3.objects[Vision3_objectIndex].centerX > 155.0) { //was 157.0
-        Drivetrain.turn(right);
-      }
-      if (Vision3.objects[Vision3_objectIndex].centerX < 145.0) { //was 105
-        Drivetrain.turn(left);
-      }
-      if (Vision3.objects[Vision3_objectIndex].centerX > 150.0 && Vision3.objects[Vision3_objectIndex].centerX < 150.0) {
-        if (Vision3.objects[Vision3_objectIndex].width < 1000.0) {
-          Drivetrain.drive(forward);
-        }
-        else {
-          Drivetrain.stop();
-        }
-      }
-    }
-    //else {
-      //Drivetrain.setTurnVelocity(50.0, percent);
-      //Drivetrain.turn(right);
-    //}
+      CataMotor.stop();
     }
     
-    
-  wait(5, msec);
-  }
 }
+  }
+// Main will set up the competition functions and callbacks.
 int main() {
-  Controller1.ButtonA.released(onevent_Controller1ButtonRight_released_0);
-  Controller1.ButtonA.pressed(onevent_Controller1ButtonRight_pressed_0);
-
-  // Set up callbacks for autonomous and driver control.
+  // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);
   Competition.drivercontrol(usercontrol);
-  //IntakeMotor.setStopping(hold);
- // Drivetrain.setStopping(hold);
-  LauncherMotor.setVelocity(67,percent);
-  IntakeMotor.setVelocity(100,percent);
-  RollerMotor.setVelocity(100,percent);
-  IndexerMotor.setVelocity(100,percent);
-  
+
   // Run the pre-autonomous function.
   pre_auton();
 
