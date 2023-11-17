@@ -15,12 +15,6 @@ motor LeftUPMotor = motor(PORT9, ratio6_1, false);
 motor IntakeMotor = motor(PORT1, ratio6_1, true);
 motor CataMotor = motor(PORT6, ratio6_1, false);
 controller Controller1 = controller(primary);
-
-
-
-
-
-
 void pre_auton(void) {
     // Initializing Robot Configuration. DO NOT REMOVE!
     vexcodeInit();
@@ -96,25 +90,58 @@ void autonomous(void) {
     drivetrain.stop();*/
 }
 
+//lock left motors when turning joystick left
+void lockLeftMotorsTurnLeft() {
+  LeftRMotor.setBrake(hold);
+  LeftFMotor.setBrake(hold);
+  LeftUPMotor.setBrake(hold);
+}
 
+// unlock left motors
+void unlockLeftMotors() {
+  LeftRMotor.setBrake(coast);
+  LeftFMotor.setBrake(coast);
+  LeftUPMotor.setBrake(coast);
+}
+//lock right motors when turning right
+void lockRightMotorsTurnRight() {
+    RightFMotor.setBrake(hold);
+    RightRMotor.setBrake(hold);
+    RightUPMotor.setBrake(hold);
+}
+
+// unlock right motors
+void unlockRightMotors() {
+    RightFMotor.setBrake(coast);
+    RightRMotor.setBrake(coast);
+    RightUPMotor.setBrake(coast);
+}
 void usercontrol(void) {
     while (1) {
         double forward_backward = -Controller1.Axis3.position();
         double turn = -Controller1.Axis1.position();
-        double kp_turn = 5; 
+        if (turn > 0) {
+            lockLeftMotorsTurnLeft();
+            unlockRightMotors();
+        } else if (turn < 0) {
+            lockRightMotorsTurnRight();
+            unlockLeftMotors();
+        } else {
+            unlockLeftMotors();
+            unlockRightMotors();
+        }
+        double kp_turn = 5.0; 
         double kp_forward = 5.0; 
         double forwardAdjustment = forward_backward * kp_forward;
         double turnAdjustment = turn * kp_turn;
         double left_speed = (forwardAdjustment + turnAdjustment) * 0.5;
         double right_speed = (forwardAdjustment - turnAdjustment) * 0.5;
-
         LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftUPMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
         RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
         RightUPMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
-
         // Intake Code
         if (Controller1.ButtonL2.pressing()) {
             IntakeMotor.setVelocity(100, pct);
