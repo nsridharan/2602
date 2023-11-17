@@ -99,18 +99,13 @@ void autonomous(void) {
 
 void usercontrol(void) {
     while (1) {
-        double forward_backward = -Controller1.Axis3.position(); 
+        double forward_backward = -Controller1.Axis3.position();
         double turn = -Controller1.Axis1.position();
-        double left_speed = (forward_backward + turn) * 0.5;
-        double right_speed = (forward_backward - turn) * 0.5;
-        if (forward_backward != 0 && turn != 0) {
-            if (turn > 0) {
-                right_speed *= 0.7;
-            } else {
-                left_speed *= 0.7;
-            }
-        }
-        
+        double kp = 5;
+        double forwardAdjustment = forward_backward * kp;
+        double turnAdjustment = turn ;
+        double left_speed = (forwardAdjustment + turnAdjustment) * 0.5;
+        double right_speed = (forwardAdjustment - turnAdjustment) * 0.5;
 
         LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
