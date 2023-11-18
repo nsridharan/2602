@@ -1,5 +1,13 @@
 #include "vex.h"
 
+// ---- START VEXCODE CONFIGURED DEVICES ----
+// Robot Configuration:
+// [Name]               [Type]        [Port(s)]
+// Wings1               digital_in    A               
+// Wings2               digital_in    B               
+// Blocker              digital_in    C               
+// ---- END VEXCODE CONFIGURED DEVICES ----
+
 using namespace vex;
 
 // A global instance of competition
@@ -155,16 +163,23 @@ void usercontrol(void) {
         wait(20, msec);
 
         // Cata Code
-        if (Controller1.ButtonR1.pressing()) {
-            CataMotor.setVelocity(100, pct);
-            CataMotor.spin(reverse);
-        } else if (Controller1.ButtonR2.pressing()) {
+          if (Controller1.ButtonR2.pressing()) {
             CataMotor.setVelocity(100, pct);
             CataMotor.spin(fwd);
         } else {
             CataMotor.stop();
         }
-    }
+    }   /*// aeronomics code
+        if( Controller1.ButtonR1.pressing() ) {
+          Wings1.set(true);
+          Wings2.set(true);
+          
+        }
+        else if( Controller1.ButtonY.pressing()) {
+          Wings1.set(false);
+          Wings2.set(false);
+        }*/
+          
 }
 
 // Main will set up the competition functions and callbacks.
