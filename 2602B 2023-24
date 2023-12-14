@@ -1,27 +1,19 @@
 #include "vex.h"
 
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Wings1               digital_in    A               
-// Wings2               digital_in    B               
-// Blocker              digital_in    C               
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
 using namespace vex;
 
 // A global instance of competition
 competition Competition;
 
 // Define your global instances of motors and other devices here
-motor LeftRMotor = motor(PORT9, ratio6_1, true); //X
-motor LeftFMotor = motor(PORT1, ratio6_1, true); //X
-motor RightRMotor = motor(PORT4, ratio6_1, true); //X
-motor RightFMotor = motor(PORT3, ratio6_1, true); //X
-motor RightUPMotor = motor(PORT5, ratio6_1, false); //X
-motor LeftUPMotor = motor(PORT8, ratio6_1, false); //X
-motor IntakeMotor = motor(PORT2, ratio6_1, true); 
-motor FlyMotor = motor(PORT7, ratio6_1, false);
+motor LeftRMotor = motor(PORT13, ratio6_1, true); //X
+motor LeftFMotor = motor(PORT11, ratio6_1, true); //X
+motor RightRMotor = motor(PORT18, ratio6_1, true); //X
+motor RightFMotor = motor(PORT20, ratio6_1, true); //X
+motor RightUPMotor = motor(PORT19, ratio6_1, false); //X
+motor LeftUPMotor = motor(PORT12, ratio6_1, false); //X
+motor IntakeMotor = motor(PORT17, ratio6_1, true); 
+motor FlyMotor = motor(PORT14, ratio6_1, false);
 controller Controller1 = controller(primary);
 void pre_auton(void) {
     // Initializing Robot Configuration. DO NOT REMOVE!
@@ -30,22 +22,51 @@ void pre_auton(void) {
 
     Wings1.set(true);
     Wings2.set(true);
-    Blocker.set(false);
+    DR4B.set(true);
 
     wait(2, sec);
 }
+void driveDistance(double distance, double speed) {
+    // Calculate the time required to cover the given distance at the given speed
+    double time = (distance / (3.25 * 3.14159265359)) * 360.0 / speed; // Assuming the wheel diameter is 3.25 inches
+
+    // Set the velocity for the motors
+    LeftFMotor.setVelocity(speed, pct);
+    LeftRMotor.setVelocity(speed, pct);
+    LeftUPMotor.setVelocity(speed, pct);
+    RightFMotor.setVelocity(speed, pct);
+    RightRMotor.setVelocity(speed, pct);
+    RightUPMotor.setVelocity(speed, pct);
+
+    // Start the motors in the forward direction
+    LeftFMotor.spin(forward);
+    LeftRMotor.spin(forward);
+    LeftUPMotor.spin(forward);
+    RightFMotor.spin(forward);
+    RightRMotor.spin(forward);
+    RightUPMotor.spin(forward);
+
+    // Wait for the calculated time
+    wait(time, msec);
+
+    // Stop the motors
+    LeftFMotor.stop();
+    LeftRMotor.stop();
+    LeftUPMotor.stop();
+    RightFMotor.stop();
+    RightRMotor.stop();
+    RightUPMotor.stop();
+}
 
 void autonomous(void) {
-    Wings1.set(true);
-    Wings2.set(true);
-    Blocker.set(false);
     motor_group leftMotors = motor_group(LeftRMotor, LeftFMotor, LeftUPMotor);
     motor_group rightMotors = motor_group(RightRMotor, RightFMotor, RightUPMotor);
-    leftMotors.setVelocity(60, pct);
+    driveDistance(24.0, 70.0);
+    /*leftMotors.setVelocity(60, pct);
     rightMotors.setVelocity(60, pct); 
     leftMotors.spin(forward);
     rightMotors.spin(reverse);
-    wait(1.2, sec);
+    wait(1.1, sec);
     leftMotors.stop();
     rightMotors.stop();
     leftMotors.spin(forward);
@@ -55,49 +76,12 @@ void autonomous(void) {
     rightMotors.stop();
     leftMotors.spin(forward);
     rightMotors.spin(reverse);
-    wait(0.1, sec);
+    wait(0.15, sec);
     leftMotors.stop();
     rightMotors.stop();
     IntakeMotor.spin(forward);
     wait(0.8, sec);
-    IntakeMotor.stop();
-    /*// intake it 
-    IntakeMotor.setVelocity(100, pct);
-    IntakeMotor.spin(reverse);
-    // turning 
-    leftMotors.spin(forward);
-    rightMotors.spin(reverse);
-    wait(0.17, sec);
-    leftMotors.stop();
-    rightMotors.stop();
-    drivetrain.spin(reverse);
-    wait(0.8, sec);
-    drivetrain.stop();
-    IntakeMotor.setVelocity(100, pct);
-    IntakeMotor.spin(forward);
-    wait(0.65, sec);
-    IntakeMotor.stop();
-    drivetrain.spin(forward);
-    wait(0.13, sec);
-    drivetrain.stop();
-    // turning 
-    leftMotors.spin(forward);
-    rightMotors.spin(reverse);
-    wait(0.285, sec);
-    leftMotors.stop();
-    rightMotors.stop();
-    // driving forward
-    drivetrain.spin(reverse);
-    wait(1.35, sec);
-    drivetrain.stop();
-    //suckit
-    IntakeMotor.setVelocity(100, pct);
-    IntakeMotor.spin(forward);
-    wait(0.65, sec);
-    IntakeMotor.stop();
-    drivetrain.spin(forward);
-    wait(0.5, sec);
-    drivetrain.stop();*/
+    IntakeMotor.stop();*/
 }
 
 //lock left motors when turning joystick left
@@ -128,23 +112,25 @@ void unlockRightMotors() {
 void usercontrol(void) {
     while (1) {
         double forward_backward = Controller1.Axis1.position();
-        double turn = Controller1.Axis3.position();
-        if (turn > 0) {
-            lockLeftMotorsTurnLeft();
-            unlockRightMotors();
-        } else if (turn < 0) {
-            lockRightMotorsTurnRight();
-            unlockLeftMotors();
-        } else {
-            unlockLeftMotors();
-            unlockRightMotors();
-        }
-        double kp_turn = 5.0; 
-        double kp_forward = 5.0; 
-        double forwardAdjustment = forward_backward * kp_forward;
-        double turnAdjustment = turn * kp_turn;
-        double left_speed = (forwardAdjustment + turnAdjustment) * 0.5;
-        double right_speed = (forwardAdjustment - turnAdjustment) * 0.5;
+        double turn = - Controller1.Axis3.position();
+        if (turn > 0) { 
+        lockLeftMotorsTurnLeft(); 
+        unlockRightMotors(); 
+    } else if (turn < 0) { 
+        lockRightMotorsTurnRight(); 
+        unlockLeftMotors(); 
+    } else { 
+        unlockLeftMotors(); 
+        unlockRightMotors();
+    }
+      double kp_turn = 5.0; 
+      double kp_forward = 5.0; 
+
+      double forwardAdjustment = forward_backward * kp_forward; 
+      double turnAdjustment = turn * kp_turn; 
+
+      double left_speed = (forwardAdjustment - turnAdjustment) * 0.5; // Calculate left motor speed
+      double right_speed = (forwardAdjustment + turnAdjustment) * 0.5; // Calculate right motor speed
         LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftUPMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
@@ -181,10 +167,10 @@ void usercontrol(void) {
           Wings2.set(true);
         }
         if (Controller1.ButtonX.pressing()) {
-          Blocker.set(true);
+          DR4B.set(true);
         }
         else if (Controller1.ButtonB.pressing()){
-          Blocker.set(false);
+          DR4B.set(false);
         }
 
 
