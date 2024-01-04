@@ -1,18 +1,3 @@
-/*----------------------------------------------------------------------------*/
-/*                                                                            */
-/*    Module:       main.cpp                                                  */
-/*    Author:       VEX                                                       */
-/*    Created:      Thu Sep 26 2019                                           */
-/*    Description:  Competition Template                                      */
-/*                                                                            */
-/*----------------------------------------------------------------------------*/
-
-// ---- START VEXCODE CONFIGURED DEVICES ----
-// Robot Configuration:
-// [Name]               [Type]        [Port(s)]
-// Controller1          controller                    
-// ---- END VEXCODE CONFIGURED DEVICES ----
-
 #include "vex.h"
 
 using namespace vex;
@@ -20,73 +5,218 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 
-// define your global instances of motors and other devices here
-motor LeftRMotor = motor(PORT1, ratio6_1, false);
-motor LeftFMotor = motor(PORT2, ratio6_1, false);
-motor RightRMotor = motor(PORT3, ratio6_1, false);
-motor RightFMotor = motor(PORT4, ratio6_1, false);
-motor RightUPMotor = motor(PORT5, ratio6_1, true);
-motor LeftUPMotor = motor(PORT8, ratio6_1, true);
-motor IntakeMotor = motor(PORT7, ratio6_1, false);
+// Define your global instances of motors and other devices here
+motor LeftRMotor = motor(PORT13, ratio6_1, true); //X
+motor LeftFMotor = motor(PORT11, ratio6_1, true); //X
+motor RightRMotor = motor(PORT18, ratio6_1, true); //X
+motor RightFMotor = motor(PORT20, ratio6_1, true); //X
+motor RightUPMotor = motor(PORT19, ratio6_1, true); //X
+motor LeftUPMotor = motor(PORT12, ratio6_1, true); //X
+motor IntakeMotor = motor(PORT17, ratio6_1, true); 
+motor FlyMotor = motor(PORT14, ratio6_1, false);
 controller Controller1 = controller(primary);
-
 void pre_auton(void) {
-  // Initializing Robot Configuration. DO NOT REMOVE!
-  vexcodeInit();
-  // All activities that occur before the competition starts
-  
+    // Initializing Robot Configuration. DO NOT REMOVE!
+    vexcodeInit();
+    // All activities that occur before the competition starts
+
+    Wings1.set(true);
+    Wings2.set(true);
+    DR4B.set(true);
+
+    wait(2, sec);
+}
+void driveforward(float dist){
+  LeftFMotor.setVelocity(100, pct);
+  LeftRMotor.setVelocity(100, pct);
+  LeftUPMotor.setVelocity(100, pct);
+  RightFMotor.setVelocity(100, pct);
+  RightRMotor.setVelocity(100, pct);
+  RightUPMotor.setVelocity(100, pct);
+
+  LeftRMotor.spinFor(forward, dist, turns,false);
+  LeftFMotor.spinFor(forward, dist, turns, false);
+  LeftUPMotor.spinFor(forward, dist, turns, false);
+  RightFMotor.spinFor(reverse, dist, turns, false);
+  RightRMotor.spinFor(reverse, dist, turns, false);
+  RightUPMotor.spinFor(reverse, dist, turns);
+
+
+}
+void turn(float turnAmount, bool isLeftTurn) {
+  float turnVelocity = 100; 
+  if (isLeftTurn) {
+    LeftFMotor.setVelocity(-turnVelocity, pct);
+    LeftRMotor.setVelocity(-turnVelocity, pct);
+    LeftUPMotor.setVelocity(-turnVelocity, pct);
+    RightFMotor.setVelocity(turnVelocity, pct);
+    RightRMotor.setVelocity(turnVelocity, pct);
+    RightUPMotor.setVelocity(turnVelocity, pct);
+  } else {
+    LeftFMotor.setVelocity(turnVelocity, pct);
+    LeftRMotor.setVelocity(turnVelocity, pct);
+    LeftUPMotor.setVelocity(turnVelocity, pct);
+    RightFMotor.setVelocity(-turnVelocity, pct);
+    RightRMotor.setVelocity(-turnVelocity, pct);
+    RightUPMotor.setVelocity(-turnVelocity, pct);
+  }
+
+  float turnDistance = 10 * turnAmount; 
+
+  LeftFMotor.spinFor(turnDistance, degrees, false);
+  LeftRMotor.spinFor(turnDistance, degrees, false);
+  LeftUPMotor.spinFor(turnDistance, degrees, false);
+  RightFMotor.spinFor(turnDistance, degrees, false);
+  RightRMotor.spinFor(turnDistance, degrees, false);
+  RightUPMotor.spinFor(turnDistance, degrees);
 }
 void autonomous(void) {
-   
+    //Wings1.set(false);
+    //Wings2.set(false);
+    driveforward(3.0);
+    IntakeMotor.spin(forward);
+    wait(0.5, sec);
+    driveforward(-2);
+    IntakeMotor.spin(reverse);
+    turn(90,true); 
+    //Wings1.set(true);
+    //Wings2.set(true);
+    /*leftMotors.spin(forward);
+    rightMotors.spin(reverse);
+    wait(0.15, sec);
+    leftMotors.stop();
+    rightMotors.stop();
+    IntakeMotor.spin(forward);
+    wait(0.8, sec);
+    IntakeMotor.stop();*/
 }
+/*
+//lock left motors when turning joystick left
+void lockLeftMotorsTurnLeft() {
+  LeftRMotor.setBrake(hold);
+  LeftFMotor.setBrake(hold);
+  LeftUPMotor.setBrake(hold);
+  RightFMotor.setBrake(hold);
+  RightRMotor.setBrake(hold);
+  RightUPMotor.setBrake(hold);
+}
+
+// unlock left motors
+void unlockLeftMotors() {
+  LeftRMotor.setBrake(coast);
+  LeftFMotor.setBrake(coast);
+  LeftUPMotor.setBrake(coast);
+}
+//lock right motors when turning right
+void lockRightMotorsTurnRight() {
+    RightFMotor.setBrake(hold);
+    RightRMotor.setBrake(hold);
+    RightUPMotor.setBrake(hold);
+}
+// unlock right motors
+void unlockRightMotors() {
+    RightFMotor.setBrake(coast);
+    RightRMotor.setBrake(coast);
+    RightUPMotor.setBrake(coast);
+}
+*/
 void usercontrol(void) {
-  while (1) {
-    //Drivetrain Code
-        double forward_backward = Controller1.Axis1.position(); 
-        double turn = Controller1.Axis3.position(); 
-        double left_speed = forward_backward + turn;
-        double right_speed = forward_backward - turn;
-        if (forward_backward != 0 && turn != 0) {
-            if (turn > 0) {
-                right_speed *= 0.7;
-            } else {
-                left_speed *= 0.7; 
-            }
-        }
+    while (1) {
+      double forward_backward = Controller1.Axis1.position();
+      double turn = - Controller1.Axis3.position();
+        /*if (turn > 0) { 
+        lockLeftMotorsTurnLeft(); 
+        unlockRightMotors(); 
+        } else if (turn < 0) { 
+        lockRightMotorsTurnRight(); 
+        unlockLeftMotors(); 
+        } else { 
+        unlockLeftMotors(); 
+        unlockRightMotors();
+        }*/
+      double kp_turn = 5.0; 
+      double kp_forward = 5.0; 
+
+      double forwardAdjustment = forward_backward * kp_forward; 
+      double turnAdjustment = turn * kp_turn; 
+
+      double left_speed = (forwardAdjustment - turnAdjustment) * 0.5; // Calculate left motor speed
+      double right_speed = (forwardAdjustment + turnAdjustment) * 0.5; // Calculate right motor speed
         LeftFMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftRMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         LeftUPMotor.spin(vex::directionType::fwd, left_speed, vex::velocityUnits::pct);
         RightFMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
         RightRMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
         RightUPMotor.spin(vex::directionType::fwd, right_speed, vex::velocityUnits::pct);
-    //Intake Code
-    if(Controller1.ButtonL1.pressing()){
-      IntakeMotor.setVelocity(100,pct);
-      IntakeMotor.spin(forward);
+        // Intake Code
+        if (Controller1.ButtonL2.pressing()) {
+            IntakeMotor.setVelocity(100, pct);
+            IntakeMotor.spin(forward);
+        } else if (Controller1.ButtonL1.pressing()) {
+            IntakeMotor.setVelocity(100, pct);
+            IntakeMotor.spin(reverse);
+        } else {
+            IntakeMotor.stop();
+        }
+        wait(20, msec);
+
+        // Cata Code
+          if (Controller1.ButtonR2.pressing()) {
+            FlyMotor.setVelocity(100, pct);
+            FlyMotor.spin(fwd);
+        } else {
+            FlyMotor.stop();
+        }
+        // aeronomics
+                
+        if (Controller1.ButtonR1.pressing()) {
+          Wings2.set(false);
+          Wings1.set(false);
+        }
+        else {
+          Wings1.set(true);
+          Wings2.set(true);
+        }
+        if (Controller1.ButtonX.pressing()) {
+          DR4B.set(true);
+        }
+        else if (Controller1.ButtonB.pressing()){
+          DR4B.set(false);
+        }
+
+
+
+
+
+
+
+
+
+        }
+    }    
+          
+
+/*void blocker(void) {
+    while (1) {
+        if (Controller1.ButtonX.pressing()) {
+            Blocker.set(true); 
+        } else if (Controller1.ButtonB.pressing()) {
+            Blocker.set(false); 
+        }
+        wait(20, msec);
     }
-    else if(Controller1.ButtonL2.pressing()){
-      IntakeMotor.setVelocity(100,pct);
-      IntakeMotor.spin(reverse);
-    }
-    else{
-      IntakeMotor.stop();
-    }
-    wait(20, msec);
-    //Cata Code 
-    
-}
-  }
+}*/
 // Main will set up the competition functions and callbacks.
 int main() {
-  // Set up callbacks for autonomous and driver control periods.
-  Competition.autonomous(autonomous);
-  Competition.drivercontrol(usercontrol);
+    // Set up callbacks for autonomous and driver control periods.
+    Competition.autonomous(autonomous);
+    Competition.drivercontrol(usercontrol);
 
-  // Run the pre-autonomous function.
-  pre_auton();
+    // Run the pre-autonomous function.
+    pre_auton();
 
-  // Prevent main from exiting with an infinite loop.
-  while (true) {
-    wait(100, msec);
-  }
+    // Prevent main from exiting with an infinite loop.
+    while (true) {
+        wait(100, msec);
+    }
 }
